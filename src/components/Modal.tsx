@@ -1,6 +1,6 @@
 // src/components/ui/Modal.tsx
 import styled from 'styled-components'
-import { PropsWithChildren } from 'react'
+import type { PropsWithChildren } from 'react'
 
 const Backdrop = styled.div`
   position: fixed; inset: 0; background: rgba(0,0,0,0.5);
