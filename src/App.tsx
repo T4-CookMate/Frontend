@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { AppLayout } from "@components/layout/AppLayout";
 import OnboardingSplash from "@pages/OnboardingSplash";
 import HomePage from "@pages/HomePage";
