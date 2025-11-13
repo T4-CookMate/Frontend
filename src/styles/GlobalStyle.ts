@@ -14,9 +14,8 @@ export const GlobalStyle = createGlobalStyle`
         margin: 0;
         display: flex;
         justify-content: center;  /* 수평 중앙 */
-        align-items: center;      /* 수직 중앙 */
         background: #fff;         /* 배경 */
-        color: #fff;
+        color: #111;
         font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
     }
 `
