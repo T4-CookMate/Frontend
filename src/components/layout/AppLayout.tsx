@@ -6,6 +6,7 @@ const Layout = styled.div`
     width: 375px;
     margin: 0 auto;               /* 화면 가운데 정렬 */
     min-height: 100vh;
+    padding-top: max(30px, env(safe-area-inset-top));
     background: ${({ theme }) => theme.color.bg};
     color: ${({ theme }) => theme.color.text};
     display: flex;
