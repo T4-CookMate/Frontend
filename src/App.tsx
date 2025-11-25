@@ -4,6 +4,7 @@ import HomePage from "@pages/HomePage";
 import LoginPage from "@pages/LoginPage";
 import SearchPage from "@pages/SearchPage";
 import RootLayout from "layouts/RootLayout";
+import VoiceDebugPage from "@pages/VoiceDedugPage";
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/debug/voice" element={<VoiceDebugPage />} />
       </Route>
     </Routes>
   )
