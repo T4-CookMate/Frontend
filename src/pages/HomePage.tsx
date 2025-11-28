@@ -1,4 +1,3 @@
-import { AppLayout } from '@components/layout/AppLayout'
 import { Button } from '@components/home/Button'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'

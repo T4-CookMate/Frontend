@@ -4,11 +4,43 @@ import { Button } from '@components/SelectButton'
 import { RecipeCard } from '@components/RecipeCard'
 import type { Recipe } from 'data/recipes'
 
-const TopRow = styled.div`
+const SummaryWrap = styled.div`
+  margin-top: 8px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-top: 4px;
+  gap: 4px;
+`
+
+const MainText = styled.p`
+  margin: 0;
+  color: #fff;
+  text-align: center;
+  font-family: "KoddiUD OnGothic";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 150%; /* 27px */
+  letter-spacing: -0.36px;
+`
+
+const SubText = styled.p`
+  margin: 0;
+  color: #fff;
+  text-align: center;
+  font-family: "KoddiUD OnGothic";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 24px */
+  letter-spacing: -0.32px;
+`
+
+const ResetRow = styled.div`
+  margin-top: 8px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 `
 
 const Grid = styled.div`
@@ -45,14 +77,16 @@ export function SearchResultsSection({
 
   return (
     <>
-      <TopRow>
-        <span>
-          검색어: <strong>{confirmed}</strong> · {totalCount}건
-        </span>
+      <SummaryWrap>
+        <MainText>현재 {totalCount}개의 검색 결과가 있어요!</MainText>
+        <SubText>쿡짝꿍이 4개씩 보여줄게요</SubText>
+      </SummaryWrap>
+
+      <ResetRow>
         <Button size="sm" onClick={onReset}>
           초기화
         </Button>
-      </TopRow>
+      </ResetRow>
 
       <Grid>
         {pagedRecipes.map(r => (

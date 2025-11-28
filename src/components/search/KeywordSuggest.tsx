@@ -7,7 +7,8 @@ const SuggestBox = styled.ul`
   padding: 8px 10px;
   border-radius: 20px;
   border: 1px solid #222;
-  background: #0f0f0f;
+  color: #000;
+  background: #F3C11B;
 
   width: 100%;
   max-width: 349px;
@@ -22,19 +23,19 @@ const SuggestBox = styled.ul`
     border-radius: 12px;
     font-size: 14px;
   }
-
-  li:hover {
-    background: #171717;
-  }
 `
 
 type Props = {
   query: string
   keywords: string[]
+  visible: boolean 
   onSelect: (keyword: string) => void
 }
 
-export function KeywordSuggest({ query, keywords, onSelect }: Props) {
+export function KeywordSuggest({ query, keywords, onSelect, visible }: Props) {
+  // 검색 확정되면 숨기기
+  if (!visible) return null
+
   if (!query || keywords.length === 0) return null
 
   return (

@@ -45,8 +45,13 @@ const SearchInput = styled.input`
   font-size: 16px;
   color: #181818;
 
-  ::placeholder {
-    color: #6c5a15;
+  &&::placeholder {
+    color: #000000;
+    opacity: 1;
+  }
+
+  &&::-webkit-input-placeholder {
+    color: #000000;
   }
 `
 
@@ -55,9 +60,10 @@ type Props = {
   onChange: (value: string) => void
   onSubmit: () => void
   onVoiceClick?: () => void
+  onFocusInput?: () => void
 }
 
-export function SearchBar({ value, onChange, onSubmit, onVoiceClick }: Props) {
+export function SearchBar({ value, onChange, onSubmit, onVoiceClick, onFocusInput }: Props) {
     return (
         <SearchForm
             onSubmit={e => {
@@ -72,6 +78,7 @@ export function SearchBar({ value, onChange, onSubmit, onVoiceClick }: Props) {
                     placeholder="요리명 또는 키워드를 입력하세요"
                     value={value}
                     onChange={e => onChange(e.target.value)}
+                    onFocus={onFocusInput}
                 />
                 <VoiceButton type="button" onClick={onVoiceClick}>
                     <Icon src={voiceIcon} alt="음성 검색" />
