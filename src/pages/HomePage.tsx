@@ -8,7 +8,6 @@ import CookMateLogo from 'assets/logo_cookmate.png'
 export default function HomePage() {
   const nav = useNavigate()
   return (
-    <AppLayout>
       <Wrap>
         <FontSizeBUtton/>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -29,7 +28,6 @@ export default function HomePage() {
             <Logo src={CookMateLogo} alt="CookMate 로고" />
           </LevelContainer>
       </Wrap>
-    </AppLayout>
   )
 }
 
