@@ -90,9 +90,14 @@ export function SearchResultsSection({
 
       <Grid>
         {pagedRecipes.map(r => (
-          <RecipeCard key={r.id} onClick={() => onSelectRecipe(r)}>
-            {r.name}
-          </RecipeCard>
+          <RecipeCard
+            key={r.id}
+            title={r.name}
+            tags={r.tags}   
+            time={r.time}
+            level={r.level}
+            onClick={() => onSelectRecipe(r)}
+          />
         ))}
       </Grid>
 
