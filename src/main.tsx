@@ -1,5 +1,5 @@
 //React 앱의 진입점
-import { StrictMode } from 'react'
+// import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
@@ -12,7 +12,7 @@ import { BrowserRouter } from 'react-router-dom'
 const qc = new QueryClient()
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode>
     <QueryClientProvider client={qc}>
       <ThemeProvider theme={theme}>
         <GlobalStyle />
@@ -21,5 +21,5 @@ createRoot(document.getElementById('root')!).render(
         </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
-  </StrictMode>,
+  // </StrictMode>,
 )

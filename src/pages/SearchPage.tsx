@@ -1,6 +1,7 @@
 // src/pages/SearchPage.tsx
 import styled from 'styled-components'
 import { useMemo, useState } from 'react'
+import axios from 'axios'
 import { RECIPES, type Recipe } from 'data/recipes'
 import { SearchBar } from '@components/search/SearchBar'
 import { KeywordSuggest } from '@components/search/KeywordSuggest'
@@ -31,9 +32,9 @@ const SearchArea = styled.div`
 `
 
 const Title = styled.div`
-  color: #FFF;
+  color: #fff;
   text-align: center;
-  font-family: "KoddiUD OnGothic";
+  font-family: 'KoddiUD OnGothic';
   font-size: 24px;
   font-style: normal;
   font-weight: 400;
@@ -46,12 +47,18 @@ export default function SearchPage() {
 
   const [q, setQ] = useState('')
   const [confirmed, setConfirmed] = useState('')
-  const [page, setPage] = useState(1)
-  const [selected, setSelected] = useState<Recipe | null>(null)
 
+  // 🔥 서버에서 받은 검색 결과
+  const [results, setResults] = useState<Recipe[]>([])
+  const [totalCount, setTotalCount] = useState(0)
+  const [page, setPage] = useState(0) // 백엔드 page는 0부터 시작
+  const [hasMore, setHasMore] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const [selected, setSelected] = useState<Recipe | null>(null)
   const [showSuggest, setShowSuggest] = useState(false)
 
-  // 자동완성 키워드
+  // 자동완성 키워드 -> 로컬 더미 데이터 계속 사용
   const keywords = useMemo(() => {
     if (!q.trim()) return []
     const pool = new Set<string>()
@@ -62,17 +69,72 @@ export default function SearchPage() {
     return Array.from(pool).slice(0, 6)
   }, [q])
 
-  // 검색 결과
-  const results = useMemo(() => {
-    const term = confirmed.trim()
-    if (!term) return []
-    return RECIPES.filter(
-      r => r.name.includes(term) || r.tags.some(t => t.includes(term)),
-    )
-  }, [confirmed])
+  // 백엔드에서 레시피 검색
+  const fetchRecipes = async (
+    pageToLoad: number,
+    keyword: string,
+    append: boolean,
+  ) => {
+    const trimmed = keyword.trim()
+    if (!trimmed) return
 
-  const paged = results.slice(0, page * 4)
-  const hasMore = results.length > paged.length
+    const token = localStorage.getItem('accessToken')
+    if (!token) {
+      alert('로그인이 필요합니다. 먼저 구글 로그인을 해주세요.')
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      const res = await axios.get(
+        'http://43.200.235.175:8080/recipes/search',
+        {
+          params: {
+            keyword: trimmed,
+            page: pageToLoad,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      if (!res.data.isSuccess) {
+        console.error('레시피 검색 실패:', res.data)
+        alert(res.data.message ?? '레시피 검색에 실패했습니다.')
+        return
+      }
+
+      const result = res.data.result
+      const recipesFromServer = result.recipe ?? []
+
+      // 백엔드 응답 -> 프론트 Recipe 타입으로 매핑
+      const mapped: Recipe[] = recipesFromServer.map((r: any) => ({
+        id: r.recipeId,
+        name: r.name,
+        time: r.totalMinutes,
+        level: r.level,
+        tags: r.tags,
+        // isPrefer 같은 값이 필요하면 Recipe 타입에 필드 추가해서 같이 저장 가능
+      }))
+
+      setResults(prev => (append ? [...prev, ...mapped] : mapped))
+      setTotalCount(prev =>
+        append ? prev + mapped.length : mapped.length,
+      )
+      setPage(pageToLoad)
+      setHasMore(!result.isLast) // isLast = true면 더보기 없음
+    } catch (err: any) {
+      console.error('레시피 검색 중 오류 발생:', err)
+      const msg =
+        err.response?.data?.message ??
+        '레시피 검색 중 오류가 발생했습니다.'
+      alert(msg)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // 입력할 때 자동완성 열기
   const handleChangeQ = (value: string) => {
@@ -82,27 +144,31 @@ export default function SearchPage() {
 
   const submit = () => {
     if (!q.trim()) return
-    setConfirmed(q.trim())
-    setPage(1)
-    setShowSuggest(false) 
+    const term = q.trim()
+    setConfirmed(term)
+    setShowSuggest(false)
+    // 🔥 1페이지(0번 페이지) 새로 로드
+    fetchRecipes(0, term, false)
   }
 
   const reset = () => {
     setQ('')
     setConfirmed('')
-    setPage(1)
+    setResults([])
+    setTotalCount(0)
+    setPage(0)
+    setHasMore(false)
     setShowSuggest(false)
   }
 
   const handleSelectKeyword = (k: string) => {
     setQ(k)
     setConfirmed(k)
-    setPage(1)
     setShowSuggest(false)
+    fetchRecipes(0, k, false)
   }
 
   const handleVoiceClick = () => {
-    // TODO: 여기서 STT 시작 로직 연결
     console.log('voice search click')
   }
 
@@ -125,37 +191,54 @@ export default function SearchPage() {
       </BackArea>
 
       <Title>레시피 검색</Title>
-        <SearchArea>
-          <SearchBar
-            value={q}
-            onChange={handleChangeQ}
-            onSubmit={submit}
-            onVoiceClick={handleVoiceClick}
-            onFocusInput={() => setShowSuggest(true)} 
-          />
-          <KeywordSuggest
-            query={q}
-            keywords={keywords}
-            visible={showSuggest}   
-            onSelect={handleSelectKeyword}
-          />
-        </SearchArea>
 
-        <SearchResultsSection
-          confirmed={confirmed}
-          totalCount={results.length}
-          pagedRecipes={paged}
-          hasMore={hasMore}
-          onMore={() => setPage(p => p + 1)}
-          onReset={reset}
-          onSelectRecipe={openModal}
+      <SearchArea>
+        <SearchBar
+          value={q}
+          onChange={handleChangeQ}
+          onSubmit={submit}
+          onVoiceClick={handleVoiceClick}
+          onFocusInput={() => setShowSuggest(true)}
         />
+        <KeywordSuggest
+          query={q}
+          keywords={keywords}
+          visible={showSuggest}
+          onSelect={handleSelectKeyword}
+        />
+      </SearchArea>
 
-        <RecipeDetailModal
-          recipe={selected}
-          related={related}
-          onClose={closeModal}
-        />
-    </Wrap>  
+      {/* 검색 결과 섹션 */}
+      <SearchResultsSection
+        confirmed={confirmed}
+        totalCount={totalCount}
+        pagedRecipes={results} // 서버에서 받은 전체 리스트
+        hasMore={hasMore}
+        onMore={() => fetchRecipes(page + 1, confirmed, true)}
+        onReset={reset}
+        onSelectRecipe={openModal}
+      />
+
+      <RecipeDetailModal
+        recipe={selected}
+        related={related}
+        onClose={closeModal}
+        onStartCooking={recipe => {
+          // 이 부분은 기존에 만들었던 handleStartCooking 로직 그대로 넣으면 됨
+          navigate('/cook', {
+            state: {
+              recipeId: recipe.id,
+              recipeName: recipe.name,
+            },
+          })
+        }}
+      />
+
+      {loading && (
+        <p style={{ color: '#fff', textAlign: 'center', marginTop: 8 }}>
+          검색 중...
+        </p>
+      )}
+    </Wrap>
   )
 }
