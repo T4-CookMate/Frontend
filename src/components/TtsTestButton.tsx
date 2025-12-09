@@ -1,6 +1,6 @@
 // src/components/TtsTestButton.tsx
 import React from "react";
-import { speak } from "../utils/speech";
+import { speak } from "../lib/audio/speech";
 
 const TtsTestButton: React.FC = () => {
   const handleClick = () => {

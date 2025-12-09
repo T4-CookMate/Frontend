@@ -74,8 +74,8 @@ export function usePcmStream(wsUrl?: string) {
     // 1. 마이크 권한 요청  (★ 이 부분은 이제 WS와 상관 없이 항상 실행됨)
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    // 오디오 컨텍스트 생성
-    const audioContext = new AudioContext();
+    // 오디오 컨텍스트 생성 (백엔드가 요청하는 sampleRate 형식으로 맞춰야함)
+    const audioContext = new AudioContext({ sampleRate: 16000 });
     audioContextRef.current = audioContext;
 
     // 디버그용: 브라우저가 실제로 쓰는 샘플레이트 기록
