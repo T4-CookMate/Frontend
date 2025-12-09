@@ -41,7 +41,7 @@ const GoogleCallbackPage = () => {
         localStorage.setItem("profileImageUrl", profileImageUrl);
 
         // 메인 페이지로 보내기
-        navigate("/");
+        navigate("/home");
       })
       .catch((err) => {
         console.error("백엔드 로그인 연동 실패:", err);
