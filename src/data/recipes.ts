@@ -5,6 +5,7 @@ export type Recipe = {
   thumbnail?: string
   time: number
   level: "쉬움" | "보통" | "어려움"
+  isPrefer?: boolean
 }
 
 export const RECIPES: Recipe[] = [

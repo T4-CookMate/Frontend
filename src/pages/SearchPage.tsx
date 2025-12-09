@@ -6,7 +6,7 @@ import { RECIPES, type Recipe } from 'data/recipes'
 import { SearchBar } from '@components/search/SearchBar'
 import { KeywordSuggest } from '@components/search/KeywordSuggest'
 import { SearchResultsSection } from '@components/search/SearchResultsSection'
-import { RecipeDetailModal } from '@components/search/RecipeDetailModal'
+// import { RecipeDetailModal } from '@components/search/RecipeDetailModal'
 import { BackButton } from '@components/search/BackButton'
 import { useNavigate } from 'react-router-dom'
 
@@ -55,7 +55,7 @@ export default function SearchPage() {
   const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const [selected, setSelected] = useState<Recipe | null>(null)
+  // const [selected, setSelected] = useState<Recipe | null>(null)
   const [showSuggest, setShowSuggest] = useState(false)
 
   // 자동완성 키워드 -> 로컬 더미 데이터 계속 사용
@@ -172,17 +172,28 @@ export default function SearchPage() {
     console.log('voice search click')
   }
 
-  const openModal = (r: Recipe) => setSelected(r)
-  const closeModal = () => setSelected(null)
+  // const openModal = (r: Recipe) => setSelected(r)
+  // const closeModal = () => setSelected(null)
 
-  const related = useMemo(() => {
-    if (!selected) return []
-    return RECIPES.filter(
-      r =>
-        r.id !== selected.id &&
-        r.tags.some(t => selected.tags.includes(t)),
-    )
-  }, [selected])
+  // const related = useMemo(() => {
+  //   if (!selected) return []
+  //   return RECIPES.filter(
+  //     r =>
+  //       r.id !== selected.id &&
+  //       r.tags.some(t => selected.tags.includes(t)),
+  //   )
+  // }, [selected])
+
+  const handleSelectRecipe = (recipe: Recipe) => {
+    navigate(`/recipes/${recipe.id}`, {
+      state: {
+        name: recipe.name,
+        time: recipe.time,
+        level: recipe.level,
+      },
+    })
+  }
+
 
   return (
     <Wrap>
@@ -209,7 +220,7 @@ export default function SearchPage() {
       </SearchArea>
 
       {/* 검색 결과 섹션 */}
-      <SearchResultsSection
+      {/* <SearchResultsSection
         confirmed={confirmed}
         totalCount={totalCount}
         pagedRecipes={results} // 서버에서 받은 전체 리스트
@@ -217,9 +228,19 @@ export default function SearchPage() {
         onMore={() => fetchRecipes(page + 1, confirmed, true)}
         onReset={reset}
         onSelectRecipe={openModal}
+      /> */}
+
+      <SearchResultsSection
+        confirmed={confirmed}
+        totalCount={totalCount}
+        pagedRecipes={results}
+        hasMore={hasMore}
+        onMore={() => fetchRecipes(page + 1, confirmed, true)}
+        onReset={reset}
+        onSelectRecipe={handleSelectRecipe}
       />
 
-      <RecipeDetailModal
+      {/* <RecipeDetailModal
         recipe={selected}
         related={related}
         onClose={closeModal}
@@ -232,7 +253,7 @@ export default function SearchPage() {
             },
           })
         }}
-      />
+      /> */}
 
       {loading && (
         <p style={{ color: '#fff', textAlign: 'center', marginTop: 8 }}>
