@@ -37,7 +37,7 @@ const Title = styled.div`
   font-family: 'KoddiUD OnGothic';
   font-size: 24px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 150%; /* 36px */
   letter-spacing: -0.48px;
 `
@@ -198,7 +198,7 @@ export default function SearchPage() {
   return (
     <Wrap>
       <BackArea>
-        <BackButton onClick={() => navigate('/')} />
+        <BackButton onClick={() => navigate('/home')} />
       </BackArea>
 
       <Title>레시피 검색</Title>

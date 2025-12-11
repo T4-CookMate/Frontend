@@ -200,7 +200,7 @@ export default function FavoriteRecipesPage() {
     <Wrap>
       <BackArea>
         {/* 홈으로 가는 뒤로 버튼 */}
-        <BackButton onClick={() => navigate('/')} />
+        <BackButton onClick={() => navigate('/home')} />
       </BackArea>
 
       <PageTitle>즐겨찾기 레시피</PageTitle>
