@@ -29,6 +29,10 @@ type RecipeDetail = {
 }
 
 const Wrap = styled.main<{ scrolled: boolean }>`
+  width: 100%;
+  max-width: 375px;
+  margin: 0 auto;
+
   flex: 1;
   /* padding: 24px 0px; */
   display: flex;
@@ -338,7 +342,7 @@ export default function RecipeDetailPage() {
                 fill="#F2C94C"
                 aria-hidden="true"
               />
-              <InfoText>난이도 {displayLevel}</InfoText>
+              <InfoText>{displayLevel}</InfoText>
             </InfoItem>
           )}
         </InfoRow>
@@ -378,12 +382,18 @@ export default function RecipeDetailPage() {
           <Section aria-labelledby="steps-title">
             <SectionTitle id="steps-title">조리 순서</SectionTitle>
             <StepList>
-              {sortedSteps.map(step => (
-                <StepItem key={step.id}>
-                  <StepNumber>{step.stepIndex}단계</StepNumber>
-                  <StepText>{step.instruction}</StepText>
+              {sortedSteps.length > 0 ? (
+                sortedSteps.map(step => (
+                  <StepItem key={step.id}>
+                    <StepNumber>{step.stepIndex}단계</StepNumber>
+                    <StepText>{step.instruction}</StepText>
+                  </StepItem>
+                ))
+              ) : (
+                <StepItem>
+                  <StepText>등록된 조리 순서가 없습니다.</StepText>
                 </StepItem>
-              ))}
+              )}
             </StepList>
           </Section>
         </>
