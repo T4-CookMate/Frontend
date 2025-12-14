@@ -2,6 +2,15 @@
 import { useCallback, useRef, useState } from "react";
 import type { RefObject } from "react";
 
+import danger1 from "../../assets/error-v1.mp3";
+// import danger2 from "@/assets/danger2.mp3";
+
+  const audioMap: Record<string, string> = {
+    KNIFE: danger1,
+    // FIRE: danger2,
+  };
+
+
 export function useVideoFrameStream(
   wsUrl: string | undefined,
   videoRef: RefObject<HTMLVideoElement | null>,
@@ -17,6 +26,12 @@ export function useVideoFrameStream(
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const isSendingRef = useRef(false);
+
+  const playAlert = useCallback((kind: keyof typeof audioMap) => {
+    const src = audioMap[kind] ?? audioMap.KNIFE;
+    const a = new Audio(src);
+    a.play().catch((e) => console.warn("오디오 재생 실패:", e));
+  }, []);
 
   // 주기적으로 프레임 캡처해서 보내는 함수
   const startFrameLoop = useCallback(() => {
@@ -109,16 +124,15 @@ export function useVideoFrameStream(
       setIsStreaming(true);
     };
 
+    // 경고음
     ws.onmessage = (evt) => {
       try {
         const data = typeof evt.data === "string" ? JSON.parse(evt.data) : null;
         if (data?.type === "DANGER") {
-          console.warn("⚠️ DANGER:", data.message);
-          // 여기서 토스트 띄우거나 TTS로 읽게 하거나 상태 저장하면 됨
+          // 예: data.kind = "KNIFE" | "FIRE"
+          playAlert(data.kind ?? "KNIFE");
         }
-      } catch (e) {
-        // 텍스트가 아니거나 JSON이 아닐 수도 있으니 조용히 무시
-      }
+      } catch {}
     };
 
     ws.onerror = (e) => {
