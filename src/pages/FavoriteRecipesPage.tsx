@@ -33,35 +33,6 @@ const PageTitle = styled.h1`
   letter-spacing: -0.52px;
 `
 
-const DescriptionArea = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
-`
-
-const DescStrong = styled.p`
-  margin: 0;
-  color: #ffffff;
-  font-family: 'KoddiUD OnGothic';
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 150%;
-  letter-spacing: -0.32px;
-`
-
-const DescSub = styled.p`
-  margin: 0;
-  color: #ffffff;
-  font-family: 'KoddiUD OnGothic';
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 150%;
-  letter-spacing: -0.28px;
-  opacity: 0.85;
-`
-
 export default function FavoriteRecipesPage() {
   const navigate = useNavigate()
 
