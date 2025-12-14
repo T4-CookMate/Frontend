@@ -16,6 +16,8 @@ export function useVideoFrameStream(
   // 화면 캡처용 캔버스 (화면에는 안 보이고 메모리에서만 사용)
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  const isSendingRef = useRef(false);
+
   // 주기적으로 프레임 캡처해서 보내는 함수
   const startFrameLoop = useCallback(() => {
     if (timerRef.current) return;
@@ -28,6 +30,12 @@ export function useVideoFrameStream(
       const ws = wsRef.current;
 
       if (!video || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+      // (중요) 이전 프레임 처리 중이면 스킵
+      if (isSendingRef.current) return;
+
+      // (중요) WS 버퍼가 너무 쌓였으면 스킵 (예: 2MB)
+      if (ws.bufferedAmount > 2 * 1024 * 1024) return;
 
       // 비디오가 아직 준비 안됐으면 스킵
       const width = video.videoWidth;
