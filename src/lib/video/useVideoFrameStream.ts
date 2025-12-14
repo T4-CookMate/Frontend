@@ -1,9 +1,10 @@
 // lib/video/useVideoFrameStream.ts
-import { RefObject, useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import type { RefObject } from "react";
 
 export function useVideoFrameStream(
   wsUrl: string | undefined,
-  videoRef: RefObject<HTMLVideoElement>,
+  videoRef: RefObject<HTMLVideoElement | null>,
   fps: number = 1
 ) {
   const [isStreaming, setIsStreaming] = useState(false);
@@ -53,6 +54,7 @@ export function useVideoFrameStream(
           if (!blob) return;
           const buffer = await blob.arrayBuffer();
           ws.send(buffer); // ← 한 장의 JPEG 이미지를 그대로 전송
+          console.log("📤 frame bytes:", buffer.byteLength);
           setFrameCount((c) => c + 1);
         },
         "image/jpeg",
@@ -85,18 +87,30 @@ export function useVideoFrameStream(
 
     ws.onopen = () => {
       console.log("🎥 Video WebSocket connected");
-      // (선택) 서버에 메타 정보 전달
-      ws.send(
-        JSON.stringify({
-          type: "START",
-          format: "jpeg",
-          fps,
-        })
-      );
+      // // (선택) 서버에 메타 정보 전달
+      // ws.send(
+      //   JSON.stringify({
+      //     type: "START",
+      //     format: "jpeg",
+      //     fps,
+      //   })
+      // );
 
       setFrameCount(0);
       startFrameLoop();
       setIsStreaming(true);
+    };
+
+    ws.onmessage = (evt) => {
+      try {
+        const data = typeof evt.data === "string" ? JSON.parse(evt.data) : null;
+        if (data?.type === "DANGER") {
+          console.warn("⚠️ DANGER:", data.message);
+          // 여기서 토스트 띄우거나 TTS로 읽게 하거나 상태 저장하면 됨
+        }
+      } catch (e) {
+        // 텍스트가 아니거나 JSON이 아닐 수도 있으니 조용히 무시
+      }
     };
 
     ws.onerror = (e) => {
@@ -109,6 +123,7 @@ export function useVideoFrameStream(
       setIsStreaming(false);
     };
   }, [fps, isStreaming, startFrameLoop, stopFrameLoop, wsUrl]);
+
 
   // 스트리밍 중지
   const stop = useCallback(() => {
