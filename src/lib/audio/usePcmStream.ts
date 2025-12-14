@@ -40,8 +40,35 @@ export function usePcmStream(wsUrl?: string) {
     // 디버그용: stop() 후 브라우저에서 재생할 WAV URL
     const [debugAudioUrl, setDebugAudioUrl] = useState<string | null>(null);
 
+    // 서버에서 온 PCM을 재생하는 헬퍼
+    const playPcmFromServer = useCallback((arrayBuffer: ArrayBuffer) => {
+        const audioContext = audioContextRef.current;
+        if (!audioContext) {
+        console.warn("AudioContext 없음 – 아직 start() 안 된 상태일 수 있어요");
+        return;
+        }
+
+        // 서버가 보내준 건 16bit PCM(모노)라고 가정
+        const pcm16 = new Int16Array(arrayBuffer);
+        const numSamples = pcm16.length;
+
+        const audioBuffer = audioContext.createBuffer(1, numSamples, SAMPLE_RATE);
+        const channelData = audioBuffer.getChannelData(0);
+
+        // Int16 -> Float32(-1.0 ~ 1.0)
+        for (let i = 0; i < numSamples; i++) {
+        channelData[i] = pcm16[i] / 0x8000;
+        }
+
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        source.start();
+    }, []);
+
     // start() - 음성 스트림 시작
     const start = useCallback(async () => {
+        console.log("[usePcmStream] start() called");
     // 이미 시작 상태면 아무것도 안 함
     if (isStreaming) return;
 
@@ -54,13 +81,31 @@ export function usePcmStream(wsUrl?: string) {
         wsRef.current = ws;
 
         ws.onopen = () => {
+            console.log("[usePcmStream] WS OPEN");
+
             // 서버에게 음성 보냄을 알림
-            ws.send(
-            JSON.stringify({
-                type: "START",
-                sampleRate: SAMPLE_RATE,
-            })
-            );
+            // ws.send(
+            // JSON.stringify({
+            //     type: "START",
+            //     sampleRate: SAMPLE_RATE,
+            // })
+            // );
+        };
+
+        // 🔥 여기 추가: 서버에서 오는 STT/TTS 결과 받기
+        ws.onmessage = (event) => {
+        // text(JSON)인지, binary(PCM)인지 분기
+        if (typeof event.data === "string") {
+            // 예: STT 결과, 로그용
+            console.log("[WS] TEXT FROM SERVER:", event.data);
+            // 필요하면 여기서 transcript 상태 업데이트
+        } else if (event.data instanceof ArrayBuffer) {
+            console.log("[WS] BINARY FROM SERVER (TTS PCM):", event.data.byteLength);
+            // 받은 PCM을 재생
+            playPcmFromServer(event.data);
+        } else {
+            console.log("[WS] UNKNOWN MESSAGE TYPE", event.data);
+        }
         };
 
         ws.onerror = (err) => {
@@ -73,6 +118,7 @@ export function usePcmStream(wsUrl?: string) {
 
     // 1. 마이크 권한 요청  (★ 이 부분은 이제 WS와 상관 없이 항상 실행됨)
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    console.log("[usePcmStream] mic stream acquired");
 
     // 오디오 컨텍스트 생성 (백엔드가 요청하는 sampleRate 형식으로 맞춰야함)
     const audioContext = new AudioContext({ sampleRate: 16000 });
@@ -98,24 +144,29 @@ export function usePcmStream(wsUrl?: string) {
 
     // 3. 실제로 PCM 데이터 받을 콜백
     processor.onaudioprocess = (e) => {
-        // Float32(−1 ~ 1) 포맷의 실제 오디오 샘플
-        const input = e.inputBuffer.getChannelData(0);
+    const input = e.inputBuffer.getChannelData(0);
+    const pcm16 = float32ToInt16(input);
 
-        // 16비트 PCM(Int16)으로 변환
-        const pcm16 = float32ToInt16(input);
-
-        // 1) WebSocket이 살아 있으면 서버에 전송
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+    // 1) WebSocket이 살아 있으면 서버에 전송
+    if (wsRef.current) {
+        if (wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.send(pcm16.buffer);
+        console.log("📤 sent chunk", pcm16.byteLength);
+        } else {
+        console.log(
+            "⚠️ ws not open, readyState =",
+            wsRef.current.readyState
+        );
         }
+    }
 
-        // 2) 디버그용으로 메모리에 저장
-        recordedChunksRef.current.push(pcm16);
+    // 2) 디버그용으로 메모리에 저장
+    recordedChunksRef.current.push(pcm16);
 
-        // 통계 업데이트
-        setChunkCount((c) => c + 1);
-        setTotalBytes((b) => b + pcm16.byteLength);
+    setChunkCount((c) => c + 1);
+    setTotalBytes((b) => b + pcm16.byteLength);
     };
+
 
     // 4. 노드들을 연결하여 콜백 작동시키기
     source.connect(processor);
@@ -139,7 +190,7 @@ export function usePcmStream(wsUrl?: string) {
 
         // WebSocket 종료
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ type: "STOP" }));
+        // wsRef.current.send(JSON.stringify({ type: "STOP" }));
         wsRef.current.close();
         }
 

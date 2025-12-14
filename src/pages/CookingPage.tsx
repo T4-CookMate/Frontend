@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { usePcmStream } from "lib/audio/usePcmStream";
 import TtsTestButton from "@components/TtsTestButton";
+import { useVideoFrameStream } from "lib/video/useVideoFrameStream";
+
 
 type LocationState = {
   recipeId: number;
@@ -36,6 +38,13 @@ export default function CookingPage() {
     )}`;
   }, [recipeId, token]);
 
+  // 비전서버 웹소켓 연결
+  const visionWsUrl = useMemo(() => {
+    if (!recipeId || !token) return undefined;
+    return `ws://54.180.165.255/ws/vision?recipeId=${recipeId}&accessToken=${encodeURIComponent(token)}`;
+  }, [recipeId, token]);
+
+
   // 3) PCM 스트림 훅 (wsUrl을 넘기면 훅 내부에서 WebSocket 열고 PCM 전송)
   const {
     start,
@@ -45,6 +54,15 @@ export default function CookingPage() {
     totalBytes,
     debugAudioUrl,
   } = usePcmStream(wsUrl);
+
+  // 비전 서버 훅 호출
+  const {
+    start: startVision,
+    stop: stopVision,
+    isStreaming: isVisionStreaming,
+    frameCount: visionFrameCount,
+  } = useVideoFrameStream(visionWsUrl, videoRef, 1); // fps 1은 예시
+
 
   // 4) 잘못 진입했을 때 처리 (레시피 X / 토큰 X)
   useEffect(() => {
@@ -231,6 +249,25 @@ export default function CookingPage() {
           />
         </div>
       )}
+
+      <button
+        onClick={() => (isVisionStreaming ? stopVision() : startVision())}
+        disabled={!visionWsUrl}
+        style={{
+          padding: "10px 16px",
+          borderRadius: "8px",
+          fontSize: "16px",
+          cursor: "pointer",
+          background: isVisionStreaming ? "#ff5e5e" : "#4caf50",
+          color: "white",
+          border: "none",
+        }}
+      >
+        {isVisionStreaming ? "🛑 영상 스트리밍 중지" : "▶️ 영상 스트리밍 시작"}
+      </button>
+
+      <p>보낸 프레임 수: {visionFrameCount}</p>
+
 
       <TtsTestButton />
     </div>
