@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { Clock, Star, Play, Volume2 } from 'lucide-react'
 import { BackButton } from '@components/search/BackButton'
+import { unlockAudioOnce } from 'lib/audio/unlockAudio'
 
 type RouteParams = {
   recipeId: string
@@ -296,15 +297,14 @@ export default function RecipeDetailPage() {
     [detail],
   )
 
-  const handleStartCooking = () => {
-    // cook 페이지에서 recipeId 로 다시 상세 불러쓰면 됨
-    navigate('/cook', {
-      state: {
-        recipeId: Number(recipeId),
-        recipeName: displayName,
-      },
-    })
-  }
+  const handleStartCooking = async () => {
+  await unlockAudioOnce(); // 클릭 제스처에서 오디오 권한 확보
+  navigate("/cook", {
+    state: { 
+      recipeId: Number(recipeId), 
+      recipeName: displayName },
+  });
+};
 
 
   return (
