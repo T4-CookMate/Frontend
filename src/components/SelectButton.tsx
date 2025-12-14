@@ -63,7 +63,7 @@ export const Button = styled.button<ButtonProps>`
         `
       default:
         return css`
-          background: #ddd;
+          background: #ffffff;
           color: #111;
         `
     }
