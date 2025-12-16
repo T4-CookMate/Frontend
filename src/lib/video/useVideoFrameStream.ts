@@ -2,13 +2,22 @@
 import { useCallback, useRef, useState } from "react";
 import type { RefObject } from "react";
 
-import danger1 from "../../assets/error-v1.mp3";
-// import danger2 from "@/assets/danger2.mp3";
+// import danger1 from "../../assets/error-v1.mp3";
+// // import danger2 from "@/assets/danger2.mp3";
 
-  const audioMap: Record<string, string> = {
-    KNIFE: danger1,
-    // FIRE: danger2,
-  };
+//   const audioMap: Record<string, string> = {
+//     KNIFE: danger1,
+//     // FIRE: danger2,
+//   };
+
+import dangerKnife from "../../assets/error-v1.mp3";
+import dangerFire from "../../assets/error-v1.mp3"; // 수정예정
+
+const audioMapByCode: Record<string, string> = {
+  danger_knife: dangerKnife,
+  danger_fire: dangerFire,
+};
+
 
 
 export function useVideoFrameStream(
@@ -27,11 +36,12 @@ export function useVideoFrameStream(
 
   const isSendingRef = useRef(false);
 
-  const playAlert = useCallback((kind: keyof typeof audioMap) => {
-    const src = audioMap[kind] ?? audioMap.KNIFE;
-    const a = new Audio(src);
-    a.play().catch((e) => console.warn("오디오 재생 실패:", e));
-  }, []);
+  // const playAlert = useCallback((kind: keyof typeof audioMap) => {
+  //   const src = audioMap[kind] ?? audioMap.KNIFE;
+  //   const a = new Audio(src);
+  //   a.play().catch((e) => console.warn("오디오 재생 실패:", e));
+  // }, []);
+
 
   // 주기적으로 프레임 캡처해서 보내는 함수
   const startFrameLoop = useCallback(() => {
@@ -126,14 +136,21 @@ export function useVideoFrameStream(
 
     // 경고음
     ws.onmessage = (evt) => {
-      try {
-        const data = typeof evt.data === "string" ? JSON.parse(evt.data) : null;
-        if (data?.type === "DANGER") {
-          // 예: data.kind = "KNIFE" | "FIRE"
-          playAlert(data.kind ?? "KNIFE");
-        }
-      } catch {}
-    };
+    try {
+      const data = typeof evt.data === "string" ? JSON.parse(evt.data) : null;
+
+      if (data?.type === "DANGER") {
+        const code = String(data.code ?? "").toLowerCase(); // "danger_fire"
+        const src = audioMapByCode[code] ?? audioMapByCode["danger_knife"];
+
+        const a = new Audio(src);
+        a.play().catch((e) => console.warn("오디오 재생 실패:", e));
+      }
+    } catch (e) {
+      console.warn("DANGER 메시지 파싱 실패:", e);
+    }
+  };
+
 
     ws.onerror = (e) => {
       console.error("Video WebSocket error", e);
