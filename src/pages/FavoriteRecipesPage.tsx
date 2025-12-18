@@ -59,7 +59,7 @@ export default function FavoriteRecipesPage() {
       setLoading(true)
 
       const res = await axios.get(
-        'http://43.200.235.175:8080/recipes/prefer',
+        'https://43.200.235.175.nip.io/recipes/prefer',
         {
           params: {
             page: pageToLoad,
