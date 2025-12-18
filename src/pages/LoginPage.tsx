@@ -2,6 +2,7 @@
 import styled from "styled-components";
 import logo from "../assets/logo_cookmate.png";
 import googleLogo from "../assets/google_logo.png";
+import { useEffect, useRef } from "react";
 
 const Page = styled.main`
   width: 100%;
@@ -70,6 +71,7 @@ const GoogleButton = styled.button`
     outline: 3px solid #ffffff;
     outline-offset: 3px;
   }
+  
 `;
 
 const GoogleIcon = styled.img`
@@ -77,12 +79,32 @@ const GoogleIcon = styled.img`
   height: 24px;
 `;
 
+const srOnlyStyle: React.CSSProperties = {
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  margin: "-1px",
+  padding: 0,
+  border: 0,
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  whiteSpace: "nowrap",
+};
+
+
 export default function LoginPage() {
+  const srRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      srRef.current?.focus();
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
+
   const GOOGLE_AUTH_URL = (() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    const redirectUri = encodeURIComponent(
-      import.meta.env.VITE_GOOGLE_REDIRECT_URI
-    );
+    const redirectUri = encodeURIComponent(import.meta.env.VITE_GOOGLE_REDIRECT_URI);
     const scope = encodeURIComponent("openid email profile");
 
     return (
@@ -101,18 +123,22 @@ export default function LoginPage() {
   };
 
   return (
-    <Page aria-label="쿡짝꿍 로그인 화면">
-      <Content>
-        <LogoImage src={logo} alt="선글라스를 낀 셰프 모자 로고" />
-        <Subtitle>시각장애인 요리 보조 서비스</Subtitle>
-        <Title>쿡짝꿍</Title>
+    <Page>
+      <p style={srOnlyStyle} tabIndex={-1} ref={srRef}>쿡짝꿍 로그인 화면입니다. 구글로 시작하기 버튼을 눌러 로그인하세요.</p>
 
-        <GoogleButton onClick={handleGoogleLogin}>
-          <GoogleIcon
-            src={googleLogo}
-            alt=""
-            aria-hidden="true"
-          />
+      <Content>
+        <LogoImage src={logo} alt="" aria-hidden="true" />
+        <Subtitle aria-hidden="true">시각장애인 요리 보조 서비스</Subtitle>
+
+        <Title>
+          쿡짝꿍 로그인
+        </Title>
+
+        <GoogleButton
+          onClick={handleGoogleLogin}
+          aria-label="구글 계정으로 로그인하기"
+        >
+          <GoogleIcon src={googleLogo} alt="" aria-hidden="true" />
           <span>구글로 시작하기</span>
         </GoogleButton>
       </Content>

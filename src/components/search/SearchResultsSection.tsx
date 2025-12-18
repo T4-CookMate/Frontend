@@ -43,12 +43,26 @@ const ResetRow = styled.div`
   justify-content: flex-end;
 `
 
-const Grid = styled.div`
+// const Grid = styled.div`
+//   display: grid;
+//   grid-template-columns: repeat(2, 1fr);
+//   gap: 12px;
+//   margin-top: 8px;
+// `
+
+const Grid = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  margin-top: 8px;
-`
+`;
+
+const Item = styled.li`
+  margin: 0;
+`;
 
 const MoreWrap = styled.div`
   margin-top: 12px;
@@ -77,7 +91,7 @@ export function SearchResultsSection({
 
   return (
     <>
-      <SummaryWrap>
+      <SummaryWrap aria-live="polite">
         <MainText>현재 {totalCount}개의 검색 결과가 있어요!</MainText>
         <SubText>쿡짝꿍이 4개씩 보여줄게요</SubText>
       </SummaryWrap>
@@ -88,18 +102,22 @@ export function SearchResultsSection({
         </Button>
       </ResetRow>
 
-      <Grid>
+      <Grid aria-label={`${confirmed} 검색 결과`}>
         {pagedRecipes.map(r => (
-          <RecipeCard
-            key={r.id}
-            title={r.name}
-            tags={r.tags}   
-            time={r.time}
-            level={r.level}
-            onClick={() => onSelectRecipe(r)}
-          />
+          <Item key={r.id}>
+            <RecipeCard
+              title={r.name}
+              tags={r.tags}
+              time={r.time}
+              level={r.level}
+              onClick={() => onSelectRecipe(r)}
+              // 카드가 한 번에 읽히도록 요약 라벨 추가(RecipeCard가 받게)
+              ariaLabel={`${r.name}, ${r.time}분, 난이도 ${r.level}. 선택하면 상세 화면으로 이동`}
+            />
+          </Item>
         ))}
       </Grid>
+
 
       {hasMore && (
         <MoreWrap>

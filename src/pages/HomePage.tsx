@@ -1,4 +1,5 @@
 // src/pages/HomePage.tsx
+import { useEffect, useRef } from 'react'
 import { Button } from '@components/home/Button'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
@@ -7,9 +8,22 @@ import { Mic, Search, Heart, FileText } from 'lucide-react'
 
 export default function HomePage() {
   const nav = useNavigate()
+  const entryRef = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      entryRef.current?.focus()
+    }, 0)
+    return () => window.clearTimeout(t)
+  }, [])
 
   return (
-    <Wrap>
+    <Wrap aria-labelledby="home-title">
+      {/* 홈 화면 시작점 */}
+      <SrOnly id="home-title" ref={entryRef} tabIndex={-1}>
+        쿡짝꿍 홈 화면입니다. 음성으로 시작하거나 레시피를 검색할 수 있어요.
+      </SrOnly>
+
       {/* 상단 폰트 크기 토글 */}
       <TopRow>
         <FontSizeBUtton />
@@ -61,11 +75,14 @@ export default function HomePage() {
       </MenuButtons>
 
       {/* 쿠킹 레벨 카드 */}
-      <LevelCard aria-label="쿠킹 레벨 정보">
-        <LevelTitle>OO님의 쿠킹 레벨</LevelTitle>
-        <LevelSubtitle>오늘의 추천 요리: 간장계란밥</LevelSubtitle>
-        <LevelDescription>꾸준히 요리하고 있어요!</LevelDescription>
+      <LevelCard role="group" aria-label="OO님의 쿠킹 레벨. 오늘의 추천 요리: 간장계란밥. 꾸준히 요리하고 있어요.">
+        <div aria-hidden="true">
+          <LevelTitle>OO님의 쿠킹 레벨</LevelTitle>
+          <LevelSubtitle>오늘의 추천 요리: 간장계란밥</LevelSubtitle>
+          <LevelDescription>꾸준히 요리하고 있어요!</LevelDescription>
+        </div>
       </LevelCard>
+
     </Wrap>
   )
 }
@@ -194,3 +211,14 @@ const LevelDescription = styled.p`
   line-height: 150%;
   letter-spacing: -0.36px;
 `
+
+const SrOnly = styled.h1`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+`;
