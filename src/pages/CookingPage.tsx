@@ -36,7 +36,7 @@ export default function CookingPage() {
   // 3️⃣ 비전 WS URL
   const visionWsUrl = useMemo(() => {
     if (!recipeId || !token) return undefined;
-    return `ws://54.180.165.255/ws/vision?recipeId=${recipeId}&accessToken=${encodeURIComponent(
+    return `wss://54.180.165.255.nip.io/ws/vision?recipeId=${recipeId}&accessToken=${encodeURIComponent(
       token
     )}`;
   }, [recipeId, token]);
