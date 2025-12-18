@@ -28,7 +28,7 @@ export default function CookingPage() {
   // 2️⃣ 음성 WS URL
   const voiceWsUrl = useMemo(() => {
     if (!recipeId || !token) return undefined;
-    return `ws://43.200.235.175:8080/ws/voice?recipeId=${recipeId}&token=${encodeURIComponent(
+    return `wss://43.200.235.175.nip.io/ws/voice?recipeId=${recipeId}&token=${encodeURIComponent(
       token
     )}`;
   }, [recipeId, token]);

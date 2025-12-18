@@ -88,7 +88,7 @@ export default function SearchPage() {
       setLoading(true)
 
       const res = await axios.get(
-        'http://43.200.235.175:8080/recipes/search',
+        'https://43.200.235.175.nip.io/recipes/search',
         {
           params: {
             keyword: trimmed,
