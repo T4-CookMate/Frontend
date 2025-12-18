@@ -258,7 +258,7 @@ export default function RecipeDetailPage() {
         setError(null)
 
         const res = await axios.get(
-          `http://43.200.235.175:8080/recipes/${recipeId}`,
+          `https://43.200.235.175.nip.io/recipes/${recipeId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
