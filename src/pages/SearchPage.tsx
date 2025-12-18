@@ -1,6 +1,6 @@
 // src/pages/SearchPage.tsx
+import { useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { RECIPES, type Recipe } from 'data/recipes'
 import { SearchBar } from '@components/search/SearchBar'
@@ -31,19 +31,38 @@ const SearchArea = styled.div`
   align-items: center;
 `
 
-const Title = styled.div`
+const Title = styled.h1`
+  margin: 0;
   color: #fff;
   text-align: center;
   font-family: 'KoddiUD OnGothic';
   font-size: 24px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 150%; /* 36px */
+  line-height: 150%;
   letter-spacing: -0.48px;
 `
 
+const SrOnly = styled.p`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+`;
+
 export default function SearchPage() {
   const navigate = useNavigate()
+  const titleRef = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      titleRef.current?.focus()
+    }, 0)
+    return () => window.clearTimeout(t)
+  }, [])
 
   const [q, setQ] = useState('')
   const [confirmed, setConfirmed] = useState('')
@@ -194,14 +213,22 @@ export default function SearchPage() {
     })
   }
 
+  const liveMsg =
+    loading
+      ? '검색 중입니다.'
+      : confirmed
+        ? `${confirmed} 검색 결과 ${totalCount}개입니다.`
+        : '검색어를 입력해 레시피를 검색하세요.'
+
 
   return (
-    <Wrap>
+    <Wrap aria-labelledby="search-title">
+      <SrOnly aria-live="polite">{liveMsg}</SrOnly>
       <BackArea>
         <BackButton onClick={() => navigate('/home')} />
       </BackArea>
 
-      <Title>레시피 검색</Title>
+      <Title id="search-title" ref={titleRef} tabIndex={-1}>레시피 검색</Title>
 
       <SearchArea>
         <SearchBar
