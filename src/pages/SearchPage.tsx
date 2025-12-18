@@ -1,8 +1,8 @@
 // src/pages/SearchPage.tsx
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import axios from 'axios'
-import { RECIPES, type Recipe } from 'data/recipes'
+import type { Recipe } from 'data/recipes'
 import { SearchBar } from '@components/search/SearchBar'
 import { KeywordSuggest } from '@components/search/KeywordSuggest'
 import { SearchResultsSection } from '@components/search/SearchResultsSection'
@@ -77,16 +77,18 @@ export default function SearchPage() {
   // const [selected, setSelected] = useState<Recipe | null>(null)
   const [showSuggest, setShowSuggest] = useState(false)
 
-  // 자동완성 키워드 -> 로컬 더미 데이터 계속 사용
-  const keywords = useMemo(() => {
-    if (!q.trim()) return []
-    const pool = new Set<string>()
-    RECIPES.forEach(r => {
-      if (r.name.includes(q)) pool.add(r.name)
-      r.tags.forEach(t => t.includes(q) && pool.add(t))
-    })
-    return Array.from(pool).slice(0, 6)
-  }, [q])
+  // // 자동완성 키워드 -> 로컬 더미 데이터 계속 사용
+  // const keywords = useMemo(() => {
+  //   if (!q.trim()) return []
+  //   const pool = new Set<string>()
+  //   RECIPES.forEach(r => {
+  //     if (r.name.includes(q)) pool.add(r.name)
+  //     r.tags.forEach(t => t.includes(q) && pool.add(t))
+  //   })
+  //   return Array.from(pool).slice(0, 6)
+  // }, [q])
+
+  const keywords: string[] = []
 
   // 백엔드에서 레시피 검색
   const fetchRecipes = async (
