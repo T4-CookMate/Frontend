@@ -1,6 +1,6 @@
 // src/pages/RecipeDetailPage.tsx
+import { useRef, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
-import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { Clock, Star, Play, Volume2 } from 'lucide-react'
@@ -65,13 +65,13 @@ const HeaderRow = styled.div`
   margin-bottom: 16px;
 `
 
-const Title = styled.h1`
+const Title = styled.h2`
   margin: 0;
   font-size: 28px;
   line-height: 1.3;
   font-weight: 700;
-  text-align: left;
 `
+
 
 const Section = styled.section`
   /* padding: 24px; */
@@ -219,6 +219,18 @@ const MessageText = styled.p`
   font-size: 16px;
 `
 
+const SrOnlyTitle = styled.h1`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+`;
+
+
 export default function RecipeDetailPage() {
     const { recipeId } = useParams<RouteParams>()
     const navigate = useNavigate()
@@ -232,14 +244,23 @@ export default function RecipeDetailPage() {
 
     const [scrolled, setScrolled] = useState(false)
 
-    useEffect(() => {
-        const onScroll = () => {
-            setScrolled(window.scrollY > 10)
-        }
+    const entryRef = useRef<HTMLHeadingElement>(null);
 
-        window.addEventListener('scroll', onScroll)
-        return () => window.removeEventListener('scroll', onScroll)
-    }, [])
+    // useEffect(() => {
+    //     const onScroll = () => {
+    //         setScrolled(window.scrollY > 10)
+    //     }
+
+    //     window.addEventListener('scroll', onScroll)
+    //     return () => window.removeEventListener('scroll', onScroll)
+    // }, [])
+
+    useEffect(() => {
+        const t = setTimeout(() => {
+          entryRef.current?.focus();
+        }, 0);
+        return () => clearTimeout(t);
+      }, []);
 
 
 
@@ -308,7 +329,15 @@ export default function RecipeDetailPage() {
 
 
   return (
-    <Wrap scrolled={scrolled}>
+    <Wrap scrolled={scrolled} aria-labelledby="recipe-entry-title">
+      <SrOnlyTitle
+        id="recipe-entry-title"
+        ref={entryRef}
+        tabIndex={-1}
+      >
+        {displayName} 레시피 상세 화면입니다.
+      </SrOnlyTitle>
+
       {/* Header */}
       <Header>
         <HeaderRow>
@@ -320,37 +349,40 @@ export default function RecipeDetailPage() {
       </Header>
 
       {/* 기본 정보 */}
-      <Section aria-label="레시피 기본 정보">
-        <InfoRow>
+      <Section
+        role="group"
+        aria-label={`조리 시간 ${displayMinutes}분, 난이도 ${displayLevel}`}
+      >
+        <InfoRow aria-hidden="true">
           {displayMinutes != null && (
             <InfoItem>
-              <Clock
-                size={28}
-                strokeWidth={2.5}
-                color="#F2C94C"
-                aria-hidden="true"
-              />
+              <Clock aria-hidden="true" />
               <InfoText>{displayMinutes}분</InfoText>
             </InfoItem>
           )}
           {displayLevel != null && (
             <InfoItem>
-              <Star
-                size={28}
-                strokeWidth={2.5}
-                color="#F2C94C"
-                fill="#F2C94C"
-                aria-hidden="true"
-              />
+              <Star aria-hidden="true" />
               <InfoText>{displayLevel}</InfoText>
             </InfoItem>
           )}
         </InfoRow>
       </Section>
 
+
       {/* 로딩 / 에러 */}
-      {loading && <MessageText>레시피를 불러오는 중이에요...</MessageText>}
-      {error && <MessageText style={{ color: 'tomato' }}>{error}</MessageText>}
+      {loading && (
+          <MessageText aria-live="polite">
+            레시피를 불러오는 중이에요...
+          </MessageText>
+        )}
+
+        {error && (
+          <MessageText aria-live="assertive" style={{ color: 'tomato' }}>
+            {error}
+          </MessageText>
+        )}
+
 
       {/* 상세 정보 */}
       {detail && !loading && !error && (
@@ -366,7 +398,14 @@ export default function RecipeDetailPage() {
             </Section>
           )}
 
-          <Section aria-labelledby="ingredients-title">
+          <Section
+            aria-labelledby="steps-title"
+            aria-describedby="steps-count"
+          >
+            <span id="steps-count" className="sr-only">
+              총 {sortedSteps.length}단계입니다.
+            </span>
+
             <SectionTitle id="ingredients-title">재료</SectionTitle>
             <IngredientList>
               {detail.ingredients.length > 0 ? (
@@ -384,10 +423,15 @@ export default function RecipeDetailPage() {
             <StepList>
               {sortedSteps.length > 0 ? (
                 sortedSteps.map(step => (
-                  <StepItem key={step.id}>
-                    <StepNumber>{step.stepIndex}단계</StepNumber>
-                    <StepText>{step.instruction}</StepText>
+                  <StepItem
+                    key={step.id}
+                    role="group"
+                    aria-label={`${step.stepIndex}단계. ${step.instruction}`}
+                  >
+                    <StepNumber aria-hidden="true">{step.stepIndex}단계</StepNumber>
+                    <StepText aria-hidden="true">{step.instruction}</StepText>
                   </StepItem>
+
                 ))
               ) : (
                 <StepItem>
