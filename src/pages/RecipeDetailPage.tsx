@@ -1,5 +1,5 @@
 // src/pages/RecipeDetailPage.tsx
-import { useRef, useEffect, useMemo, useState } from 'react'
+import { useRef, useEffect, useMemo, useState, type RefObject } from 'react'
 import styled from 'styled-components'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
@@ -35,7 +35,6 @@ const Wrap = styled.main<{ scrolled: boolean }>`
   margin: 0 auto;
 
   flex: 1;
-  /* padding: 24px 0px; */
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -72,15 +71,43 @@ const Title = styled.h2`
   font-weight: 700;
 `
 
-
-const Section = styled.section`
-  /* padding: 24px; */
+/** ✅ 스크린리더 전용 텍스트 */
+const SrOnly = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
 `
+
+/** ✅ 바로가기(스킵 링크) 영역 */
+const JumpRow = styled.div`
+  display: flex;
+  gap: 10px;
+  padding: 0 16px 12px;
+`
+
+const JumpButton = styled.button`
+  border: 2px solid rgba(242, 201, 76, 0.7);
+  background: transparent;
+  color: #f2c94c;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+`
+
+const Section = styled.section``
 
 const InfoRow = styled.div`
   display: flex;
   align-items: center;
   gap: 32px;
+  padding: 0 16px;
 `
 
 const InfoItem = styled.div`
@@ -99,12 +126,13 @@ const SectionTitle = styled.h2`
   font-size: 24px;
   font-weight: 700;
   color: #f2c94c;
+  padding: 0 16px;
 `
 
 const PillList = styled.ul`
   list-style: none;
   margin: 0 0 16px;
-  padding: 0;
+  padding: 0 16px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -119,7 +147,7 @@ const Pill = styled.li`
 
 const IngredientList = styled.ul`
   list-style: none;
-  padding: 0;
+  padding: 0 16px;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -136,14 +164,14 @@ const IngredientItem = styled.li`
 
 const StepList = styled.ol`
   list-style: none;
-  padding: 0;
+  padding: 0 16px;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  /* margin-bottom: 200px; */
 `
 
+/** ✅ StepItem을 실제로 포커스 가능하게 해서(탭/VO 탐색) 더 안정적으로 읽힘 */
 const StepItem = styled.li`
   background: rgba(255, 255, 255, 0.05);
   border-radius: 16px;
@@ -152,6 +180,11 @@ const StepItem = styled.li`
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  &:focus {
+    outline: 3px solid rgba(242, 201, 76, 0.8);
+    outline-offset: 2px;
+  }
 `
 
 const StepNumber = styled.span`
@@ -228,41 +261,39 @@ const SrOnlyTitle = styled.h1`
   border: 0;
   clip: rect(0 0 0 0);
   overflow: hidden;
-`;
-
+`
 
 export default function RecipeDetailPage() {
-    const { recipeId } = useParams<RouteParams>()
-    const navigate = useNavigate()
+  const { recipeId } = useParams<RouteParams>()
+  const navigate = useNavigate()
 
-    const location = useLocation()
-    const summary = (location.state ?? {}) as RecipeSummaryState
+  const location = useLocation()
+  const summary = (location.state ?? {}) as RecipeSummaryState
 
-    const [detail, setDetail] = useState<RecipeDetail | null>(null)
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+  const [detail, setDetail] = useState<RecipeDetail | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-    const [scrolled, setScrolled] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
-    const entryRef = useRef<HTMLHeadingElement>(null);
+  const entryRef = useRef<HTMLHeadingElement>(null)
 
-    useEffect(() => {
-        const onScroll = () => {
-            setScrolled(window.scrollY > 10)
-        }
+  /** ✅ 섹션 포커스 이동용 ref */
+  const ingredientsRef = useRef<HTMLHeadingElement>(null)
+  const stepsRef = useRef<HTMLHeadingElement>(null)
 
-        window.addEventListener('scroll', onScroll)
-        return () => window.removeEventListener('scroll', onScroll)
-    }, [])
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
-    useEffect(() => {
-        const t = setTimeout(() => {
-          entryRef.current?.focus();
-        }, 0);
-        return () => clearTimeout(t);
-      }, []);
-
-
+  useEffect(() => {
+    const t = setTimeout(() => {
+      entryRef.current?.focus()
+    }, 0)
+    return () => clearTimeout(t)
+  }, [])
 
   useEffect(() => {
     if (!recipeId) return
@@ -280,9 +311,7 @@ export default function RecipeDetailPage() {
 
         const res = await axios.get(
           `https://43.200.235.175.nip.io/recipes/${recipeId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         )
 
         if (!res.data.isSuccess) {
@@ -294,8 +323,7 @@ export default function RecipeDetailPage() {
       } catch (e: any) {
         console.error('레시피 상세 조회 오류:', e)
         setError(
-          e?.response?.data?.message ??
-            '레시피 상세 조회 중 오류가 발생했습니다.',
+          e?.response?.data?.message ?? '레시피 상세 조회 중 오류가 발생했습니다.',
         )
       } finally {
         setLoading(false)
@@ -305,54 +333,67 @@ export default function RecipeDetailPage() {
     fetchDetail()
   }, [recipeId])
 
-  // 화면에 보여줄 값 (detail 없으면 검색 카드에서 받은 값으로)
   const displayName = detail?.name ?? summary.name ?? '레시피'
   const displayMinutes = detail?.totalMinutes ?? summary.time
   const displayLevel = detail?.level ?? summary.level
 
   const sortedSteps = useMemo(
     () =>
-      detail?.steps
-        ?.slice()
-        .sort((a, b) => a.stepIndex - b.stepIndex) ?? [],
+      detail?.steps?.slice().sort((a, b) => a.stepIndex - b.stepIndex) ?? [],
     [detail],
   )
 
   const handleStartCooking = async () => {
-  await unlockAudioOnce(); // 클릭 제스처에서 오디오 권한 확보
-  navigate("/cook", {
-    state: { 
-      recipeId: Number(recipeId), 
-      recipeName: displayName },
-  });
-};
+    await unlockAudioOnce()
+    navigate('/cook', {
+      state: { recipeId: Number(recipeId), recipeName: displayName },
+    })
+  }
+
+  const jumpTo = (ref: RefObject<HTMLElement> | { current: HTMLElement | null }) => {
+  const el = ref.current
+    if (!el) return
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+    // iOS에서 포커스 씹히는 경우 대비
+    setTimeout(() => el.focus(), 200)
+    setTimeout(() => el.focus(), 600)
+  }
 
 
   return (
     <Wrap scrolled={scrolled} aria-labelledby="recipe-entry-title">
-      <SrOnlyTitle
-        id="recipe-entry-title"
-        ref={entryRef}
-        tabIndex={-1}
-      >
+      <SrOnlyTitle id="recipe-entry-title" ref={entryRef} tabIndex={-1}>
         {displayName} 레시피 상세 화면입니다.
       </SrOnlyTitle>
 
       {/* Header */}
       <Header>
         <HeaderRow>
-            <BackArea>
-                <BackButton label="뒤로가기" onClick={() => navigate(-1)} />
-            </BackArea>
+          <BackArea>
+            <BackButton label="뒤로가기" onClick={() => navigate(-1)} />
+          </BackArea>
         </HeaderRow>
         <Title>{displayName}</Title>
+
+        {/* 섹션 바로가기 */}
+        <JumpRow aria-label="섹션 바로가기">
+          <JumpButton type="button" onClick={() => jumpTo(ingredientsRef)}>
+            재료로 이동
+          </JumpButton>
+          <JumpButton type="button" onClick={() => jumpTo(stepsRef)}>
+            조리 순서로 이동
+          </JumpButton>
+        </JumpRow>
       </Header>
 
       {/* 기본 정보 */}
       <Section
         role="group"
-        aria-label={`조리 시간 ${displayMinutes}분, 난이도 ${displayLevel}`}
+        aria-label={`조리 시간 ${displayMinutes ?? '정보 없음'}분, 난이도 ${displayLevel ?? '정보 없음'}`}
       >
+        {/* 시각 표현용은 숨기되, 그룹 aria-label로 한 번에 읽히게 */}
         <InfoRow aria-hidden="true">
           {displayMinutes != null && (
             <InfoItem>
@@ -369,20 +410,16 @@ export default function RecipeDetailPage() {
         </InfoRow>
       </Section>
 
-
       {/* 로딩 / 에러 */}
       {loading && (
-          <MessageText aria-live="polite">
-            레시피를 불러오는 중이에요...
-          </MessageText>
-        )}
+        <MessageText aria-live="polite">레시피를 불러오는 중이에요...</MessageText>
+      )}
 
-        {error && (
-          <MessageText aria-live="assertive" style={{ color: 'tomato' }}>
-            {error}
-          </MessageText>
-        )}
-
+      {error && (
+        <MessageText aria-live="assertive" style={{ color: 'tomato' }}>
+          {error}
+        </MessageText>
+      )}
 
       {/* 상세 정보 */}
       {detail && !loading && !error && (
@@ -398,15 +435,20 @@ export default function RecipeDetailPage() {
             </Section>
           )}
 
-          <Section
-            aria-labelledby="steps-title"
-            aria-describedby="steps-count"
-          >
-            <span id="steps-count" className="sr-only">
-              총 {sortedSteps.length}단계입니다.
-            </span>
+          {/* ✅ 재료 섹션 */}
+          <Section aria-labelledby="ingredients-title" aria-describedby="ingredients-count">
+            <SrOnly id="ingredients-count">
+              총 {detail.ingredients?.length ?? 0}개 재료가 있습니다.
+            </SrOnly>
 
-            <SectionTitle id="ingredients-title">재료</SectionTitle>
+            <SectionTitle
+              id="ingredients-title"
+              ref={ingredientsRef}
+              tabIndex={-1}
+            >
+              재료
+            </SectionTitle>
+
             <IngredientList>
               {detail.ingredients.length > 0 ? (
                 detail.ingredients.map(ing => (
@@ -418,23 +460,33 @@ export default function RecipeDetailPage() {
             </IngredientList>
           </Section>
 
-          <Section aria-labelledby="steps-title">
-            <SectionTitle id="steps-title">조리 순서</SectionTitle>
+          {/* ✅ 조리 순서 섹션 */}
+          <Section aria-labelledby="steps-title" aria-describedby="steps-count">
+            <SrOnly id="steps-count">총 {sortedSteps.length}단계입니다.</SrOnly>
+
+            <SectionTitle
+              id="steps-title"
+              ref={stepsRef}
+              tabIndex={-1}
+            >
+              조리 순서
+            </SectionTitle>
+
             <StepList>
               {sortedSteps.length > 0 ? (
                 sortedSteps.map(step => (
                   <StepItem
                     key={step.id}
-                    role="group"
+                    tabIndex={0}  // ✅ 포커스 가능 → VO 탐색/터치 안정
                     aria-label={`${step.stepIndex}단계. ${step.instruction}`}
                   >
-                    <StepNumber aria-hidden="true">{step.stepIndex}단계</StepNumber>
-                    <StepText aria-hidden="true">{step.instruction}</StepText>
+                    {/* ✅ 이제 숨기지 말고 그대로 보여/읽히게 */}
+                    <StepNumber>{step.stepIndex}단계</StepNumber>
+                    <StepText>{step.instruction}</StepText>
                   </StepItem>
-
                 ))
               ) : (
-                <StepItem>
+                <StepItem tabIndex={0} aria-label="등록된 조리 순서가 없습니다.">
                   <StepText>등록된 조리 순서가 없습니다.</StepText>
                 </StepItem>
               )}
@@ -445,10 +497,7 @@ export default function RecipeDetailPage() {
 
       {/* 하단 액션 */}
       <BottomBar aria-label="레시피 액션">
-        <PrimaryButton
-          aria-label="해당 레시피로 요리 시작하기"
-          onClick={handleStartCooking}
-        >
+        <PrimaryButton aria-label="해당 레시피로 요리 시작하기" onClick={handleStartCooking}>
           <Play size={28} strokeWidth={3} aria-hidden="true" />
           <span>요리 시작하기</span>
         </PrimaryButton>
@@ -456,10 +505,7 @@ export default function RecipeDetailPage() {
         <SecondaryButton
           type="button"
           aria-label="음성으로 조리 순서 듣기"
-          onClick={() => {
-            // TODO: TTS 연결
-            console.log('음성으로 조리 순서 듣기')
-          }}
+          onClick={() => console.log('음성으로 조리 순서 듣기')}
         >
           <Volume2 size={28} strokeWidth={3} aria-hidden="true" />
           <span>음성으로 조리 순서 듣기</span>
