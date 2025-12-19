@@ -68,6 +68,17 @@ const MoreWrap = styled.div`
   margin-top: 12px;
 `
 
+const SrOnly = styled.p`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+`
+
 type Props = {
   confirmed: string
   totalCount: number
@@ -89,9 +100,15 @@ export function SearchResultsSection({
 }: Props) {
   if (!confirmed) return null
 
+  const summaryText = `현재 ${totalCount}개의 검색 결과가 있어요! 쿡짝꿍이 4개씩 보여줄게요.`
+
   return (
     <>
-      <SummaryWrap aria-live="polite">
+      {/* 스크린리더는 이 문장만 “한 번에” 읽음 */}
+      <SrOnly aria-live="polite">{summaryText}</SrOnly>
+
+      {/* 화면용 문장은 스크린리더에서 숨김 */}
+      <SummaryWrap aria-hidden="true">
         <MainText>현재 {totalCount}개의 검색 결과가 있어요!</MainText>
         <SubText>쿡짝꿍이 4개씩 보여줄게요</SubText>
       </SummaryWrap>

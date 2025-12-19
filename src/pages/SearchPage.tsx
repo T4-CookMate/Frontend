@@ -53,6 +53,7 @@ const SrOnly = styled.p`
   overflow: hidden;
 `;
 
+
 export default function SearchPage() {
   const navigate = useNavigate()
   const titleRef = useRef<HTMLHeadingElement>(null)
@@ -215,17 +216,18 @@ export default function SearchPage() {
     })
   }
 
-  const liveMsg =
-    loading
-      ? '검색 중입니다.'
-      : confirmed
-        ? `${confirmed} 검색 결과 ${totalCount}개입니다.`
-        : '검색어를 입력해 레시피를 검색하세요.'
+  const inputHelpId = 'search-input-help'
+
+  const inputHelp =
+  loading
+    ? '검색 중입니다.'
+    : q
+      ? '현재 검색어를 입력 중입니다. 검색어를 이어서 입력하거나 엔터를 눌러 검색하세요.'
+      : '검색어 입력창입니다. 검색어를 입력한 뒤 엔터를 누르세요.'
 
 
   return (
     <Wrap aria-labelledby="search-title">
-      <SrOnly aria-live="polite">{liveMsg}</SrOnly>
       <BackArea>
         <BackButton onClick={() => navigate('/home')} />
       </BackArea>
@@ -233,12 +235,16 @@ export default function SearchPage() {
       <Title id="search-title" ref={titleRef} tabIndex={-1}>레시피 검색</Title>
 
       <SearchArea>
+        <SrOnly id={inputHelpId}>{inputHelp}</SrOnly>
+        
         <SearchBar
           value={q}
           onChange={handleChangeQ}
           onSubmit={submit}
           onVoiceClick={handleVoiceClick}
           onFocusInput={() => setShowSuggest(true)}
+          inputAriaLabel="레시피 검색 입력창"
+          inputAriaDescribedBy={inputHelpId}
         />
         <KeywordSuggest
           query={q}
