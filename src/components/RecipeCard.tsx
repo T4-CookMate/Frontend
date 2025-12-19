@@ -1,10 +1,10 @@
 // src/components/RecipeCard.tsx
-import React, { useState } from "react"
+// import React, { useState } from "react"
 import styled from "styled-components"
 import clockIcon from "../assets/clock-icon.png"
 import levelIcon from "../assets/star-level-icon.png"
 import heartOffIcon from "../assets/heart-non.png"
-import heartOnIcon from "../assets/heart-fill.png"
+// import heartOnIcon from "../assets/heart-fill.png"
 
 const CardWrapper = styled.div`
   position: relative;
@@ -24,17 +24,6 @@ const CardButton = styled.button`
   flex-direction: column;
   justify-content: space-between;
   padding: 16px 14px;
-`;
-
-const HeartButton = styled.button`
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-
-  border: none;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
 `;
 
 
@@ -138,9 +127,13 @@ const InfoText = styled.span`
 // `
 
 const HeartIcon = styled.img`
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
   width: 24px;
   height: 24px;
 `
+
 
 const TagContainer = styled.div`
   display: flex;
@@ -220,12 +213,12 @@ export function RecipeCard({
   onClick,
   ariaLabel,
 }: RecipeCardProps) {
-  const [liked, setLiked] = useState(false)
+  // const [liked, setLiked] = useState(false)
 
-  const toggleLike = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setLiked(prev => !prev)
-  }
+  // const toggleLike = (e: React.MouseEvent) => {
+  //   e.stopPropagation()
+  //   setLiked(prev => !prev)
+  // }
 
   const label =
     ariaLabel ??
@@ -264,20 +257,14 @@ export function RecipeCard({
             </InfoColumn>
           </BottomRow>
         </div>
-      </CardButton>
 
-      {/* ✅ 하트는 별도 버튼 */}
-      <HeartButton
-        type="button"
-        onClick={toggleLike}
-        aria-pressed={liked}
-        aria-label={liked ? "즐겨찾기 취소" : "즐겨찾기에 추가"}
-      >
         <HeartIcon
-          src={liked ? heartOnIcon : heartOffIcon}
+          src={heartOffIcon}
           alt=""
+          aria-hidden="true"
         />
-      </HeartButton>
+
+      </CardButton>
     </CardWrapper>
   )
 }
