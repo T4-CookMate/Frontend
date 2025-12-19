@@ -58,6 +58,8 @@ const TagContainer = styled.div`
   display: flex;
   gap: 6px;
   align-self: center;
+  justify-content: center;
+  margin-top: 10px;
 `
 
 const BottomRow = styled.div`
