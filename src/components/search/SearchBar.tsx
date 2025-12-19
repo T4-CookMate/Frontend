@@ -61,29 +61,45 @@ type Props = {
   onSubmit: () => void
   onVoiceClick?: () => void
   onFocusInput?: () => void
+
+  // ✅ 추가: SearchPage에서 내려주는 접근성 텍스트
+  inputAriaLabel?: string
+  inputAriaDescribedBy?: string
 }
 
-export function SearchBar({ value, onChange, onSubmit, onVoiceClick, onFocusInput }: Props) {
-    return (
-        <SearchForm
-            onSubmit={e => {
-                e.preventDefault()
-                onSubmit()
-            }}
-            aria-label="레시피 검색"
-        >
-            <SearchBarWrap>
-                <Icon src={searchIcon} alt="검색" />
-                <SearchInput
-                    placeholder="요리명 또는 키워드를 입력하세요"
-                    value={value}
-                    onChange={e => onChange(e.target.value)}
-                    onFocus={onFocusInput}
-                />
-                <VoiceButton type="button" onClick={onVoiceClick}>
-                    <Icon src={voiceIcon} alt="음성 검색" />
-                </VoiceButton>
-            </SearchBarWrap>
-        </SearchForm>
-    )
+export function SearchBar({
+  value,
+  onChange,
+  onSubmit,
+  onVoiceClick,
+  onFocusInput,
+  inputAriaLabel = '레시피 검색 입력창',
+  inputAriaDescribedBy,
+}: Props) {
+  return (
+    <SearchForm
+      onSubmit={e => {
+        e.preventDefault()
+        onSubmit()
+      }}
+      aria-label="레시피 검색"
+    >
+      <SearchBarWrap>
+        {/* 아이콘은 화면용이니까 스크린리더에선 숨기는 게 깔끔 */}
+        <Icon src={searchIcon} alt="" aria-hidden="true" />
+
+        <SearchInput
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onFocus={onFocusInput}
+          aria-label={inputAriaLabel}
+          aria-describedby={inputAriaDescribedBy}
+        />
+
+        <VoiceButton type="button" onClick={onVoiceClick} aria-label="음성으로 검색">
+          <Icon src={voiceIcon} alt="" aria-hidden="true" />
+        </VoiceButton>
+      </SearchBarWrap>
+    </SearchForm>
+  )
 }
