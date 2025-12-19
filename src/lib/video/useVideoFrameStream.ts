@@ -91,7 +91,7 @@ export function useVideoFrameStream(
           setFrameCount((c) => c + 1);
         },
         "image/jpeg",
-        0.7 // 압축 품질 (0~1)
+        0.3 // 압축 품질 (0~1)
       );
     };
 
