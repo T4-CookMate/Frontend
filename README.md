@@ -1,73 +1,41 @@
-# React + TypeScript + Vite
+# CookMate Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+시각장애인을 위한 실시간 음성 기반 요리 보조 웹앱
 
-Currently, two official plugins are available:
+CookMate Frontend는 요리 과정 중 시각 정보에 의존하지 않고도
+음성 안내를 통해 조리를 완주할 수 있도록 설계된 웹 인터페이스입니다.
+접근성과 실시간 상호작용을 최우선으로 고려하여 구현되었습니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## React Compiler
+## 주요 기능
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 음성 중심 요리 진행
+  - 레시피 단계별 음성 안내 제공
+  - 화면을 보지 않아도 조리 흐름 파악 가능
 
-## Expanding the ESLint configuration
+- 웹캠 기반 실시간 요리 인식 연동
+  - 요리 시작 시 웹캠 스트림 활성화
+  - 서버와 WebSocket으로 연결되어 실시간 상태 반영
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 위험 상황 음성 알림
+  - 칼, 불 등 위험 요소 인식 시 즉각 음성 안내
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- 접근성 중심 UI
+  - VoiceOver / TalkBack 사용을 고려한 시맨틱 구조
+  - 버튼과 입력 요소를 의미 중심으로 안내
+  - 최소한의 화면 전환으로 조리 중 혼란 최소화
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 접근성 설계 포인트
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- 페이지 진입 시 현재 화면의 목적을 먼저 음성으로 안내
+- 아이콘 단독 사용을 지양하고 텍스트 기반 구조 유지
+- 조리 중 손을 사용하지 않아도 되는 음성 중심 인터랙션
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 담당 역할
+
+- 프론트엔드 UI 및 UX 설계
+- 접근성 중심 인터페이스 구현
+- 실시간 음성 및 웹캠 스트리밍 처리
+- 서버와의 WebSocket 통신 로직 구현
